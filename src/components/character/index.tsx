@@ -1,6 +1,8 @@
-import { formatSingleKeyToDirection } from "@/formatter";
 import { useEffect, useState } from "react";
 import CharacterBody from "./CharacterBody";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { setCharMovement } from "@/lib/features/movement/movementSlice";
+import { Direction } from "@/lib/features/movement/movementSlice";
 
 interface Position {
     x: number | string;
@@ -17,61 +19,52 @@ interface Props {
     size: Size;
 }
 
-export enum Direction {
-    Neutral = "neutral",
-    Up = "up",
-    Left = "left",
-    Right = "right",
-    Down = "down",
-    DiagonalUpLeft = "diagonalUpLeft",
-    DiagonalUpRight = "diagonalUpRight",
-    DiagonalDownLeft = "diagonalDownLeft",
-    DiagonalDownRight = "diagonalDownRight",
-}
-
 export default function Character(props: Props){
-    const [movement, setMovement] = useState<Direction>(Direction.Neutral);
-    const [pressedKey, setPressedKey] = useState<string[]>([])
+    const [pressedKey, setPressedKey] = useState<Direction[]>([])
+    const movement: Direction = useAppSelector(state => state.movement.value)
+    const dispatch = useAppDispatch()
+
     const size = props.size;
     const position = props.position;
+    
 
     useEffect(() => {
         const keyDownHandler = (e:any) => {
             switch(e.code){
                 case "KeyA":
                     setPressedKey(prevState => {
-                        if(prevState.find(dir => dir === "left")){
+                        if(prevState.find(dir => dir === Direction.Left)){
                             return prevState;
                         }
 
-                        return [...prevState, "left"]
+                        return [...prevState, Direction.Left]
                     })
                     break;
                 case "KeyS":
                     setPressedKey(prevState => {
-                        if(prevState.find(dir => dir === "down")){
+                        if(prevState.find(dir => dir === Direction.Down)){
                             return prevState;
                         }
                         
-                        return [...prevState, "down"]
+                        return [...prevState, Direction.Down]
                     })
                     break;
                 case "KeyD":
                     setPressedKey(prevState => {
-                        if(prevState.find(dir => dir === "right")){
+                        if(prevState.find(dir => dir === Direction.Right)){
                             return prevState;
                         }
                         
-                        return [...prevState, "right"]
+                        return [...prevState, Direction.Right]
                     })
                     break;    
                 case "KeyW":
                     setPressedKey(prevState => {
-                        if(prevState.find(dir => dir === "top")){
+                        if(prevState.find(dir => dir === Direction.Up)){
                             return prevState;
                         }
                         
-                        return [...prevState, "top"]
+                        return [...prevState, Direction.Up]
                     })
                     break;
                 default:
@@ -83,22 +76,22 @@ export default function Character(props: Props){
             switch(e.code){
                 case "KeyA":
                     setPressedKey(prevState => {
-                        return prevState.filter(dir => dir !== "left")
+                        return prevState.filter(dir => dir !== Direction.Left)
                     })
                     break;
                 case "KeyS":
                     setPressedKey(prevState => {
-                        return prevState.filter(dir => dir !== "down")
+                        return prevState.filter(dir => dir !== Direction.Down)
                     })
                     break;
                 case "KeyD":
                     setPressedKey(prevState => {
-                        return prevState.filter(dir => dir !== "right")
+                        return prevState.filter(dir => dir !== Direction.Right)
                     })
                     break;    
                 case "KeyW":
                     setPressedKey(prevState => {
-                        return prevState.filter(dir => dir !== "top")
+                        return prevState.filter(dir => dir !== Direction.Up)
                     })
                     break;
                 default:
@@ -120,34 +113,26 @@ export default function Character(props: Props){
         const secondKey = pressedKey[1];
         
         if(!secondKey && firstKey){ 
-            setMovement(formatSingleKeyToDirection(firstKey))
+            dispatch(setCharMovement({direction: firstKey}))
         }
 
-        if((firstKey === "left" && secondKey === "top") || (firstKey === "top" && secondKey === "left")){
-            setMovement(Direction.DiagonalUpLeft);
+        if((firstKey === Direction.Left && secondKey === Direction.Up) || (firstKey === Direction.Up && secondKey === Direction.Left)){
+            dispatch(setCharMovement({direction: Direction.DiagonalUpLeft}))
         }
 
-        if((firstKey === "right" && secondKey === "top") || firstKey === "top" && secondKey === "right"){
-            setMovement(Direction.DiagonalUpRight);
+        if((firstKey === Direction.Right && secondKey === Direction.Up) || firstKey === Direction.Up && secondKey === Direction.Right){
+            dispatch(setCharMovement({direction: Direction.DiagonalUpRight}))
         }
 
-        if((firstKey === "left" && secondKey === "down") || (firstKey === "down" && secondKey === "left")){
-            setMovement(Direction.DiagonalDownLeft);
+        if((firstKey === Direction.Left && secondKey === Direction.Down) || (firstKey === Direction.Down && secondKey === Direction.Left)){
+            dispatch(setCharMovement({direction: Direction.DiagonalDownLeft}))
         }
 
-        if((firstKey === "right" && secondKey === "down") || firstKey === "down" && secondKey === "right"){
-            setMovement(Direction.DiagonalDownRight);
+        if((firstKey === Direction.Right && secondKey === Direction.Down) || firstKey === Direction.Down && secondKey === Direction.Right){
+            dispatch(setCharMovement({direction: Direction.DiagonalDownRight}))
         }
 
-        if(!firstKey && !secondKey){
-            setMovement(Direction.Neutral)
-        }
-
-    }, [pressedKey])
-
-    useEffect(() => {
-        console.log(movement)
-    }, [movement])
+    }, [pressedKey]);
 
     return (
         <div style={{

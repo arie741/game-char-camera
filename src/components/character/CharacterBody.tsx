@@ -1,5 +1,5 @@
-import { Direction } from "@/components/character";
 import Image from 'next/image'
+import { Direction } from '@/lib/features/movement/movementSlice';
 
 interface Props {
     movement: Direction
@@ -7,6 +7,7 @@ interface Props {
 
 export default function CharacterBody(props: Props){
     const movement = props.movement;
+
     return (
         <>
             {movement === Direction.Neutral && <Image src="/sprites/CharNeutral.png" width={300} height={500} alt=""/>}
